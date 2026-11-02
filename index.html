@@ -72,6 +72,25 @@ button.remove { background: #a72e35; }
   <h2>Scan Equipment</h2>
   <p>Scan one item at a time. All items stay in the same batch.</p>
 
+  
+<label for="jobSelect">Select Job:</label>
+<select id="jobSelect" required>
+  <option value="">-- Select Job --</option>
+</select>
+
+<label for="technicianSelect">Select Technician:</label>
+<select id="technicianSelect" required>
+  <option value="">-- Select Technician --</option>
+</select>
+
+<label for="actionSelect">Equipment Action:</label>
+<select id="actionSelect" required>
+  <option value="">-- Select Action --</option>
+  <option value="With Technician">Picking Up Equipment</option>
+  <option value="In Office">Returning Equipment</option>
+  <option value="Installed">Installing Equipment</option>
+</select>
+
   <input id="barcodeInput"
          placeholder="Scan or enter barcode">
 
