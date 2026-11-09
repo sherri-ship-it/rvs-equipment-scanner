@@ -2,65 +2,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RVS Equipment Scanner</title>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<style>
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  padding: 16px;
-  font-family: Arial, sans-serif;
-  background: #f3f6fa;
-  color: #172b45;
-}
-header {
-  background: #142e4c;
-  color: white;
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 16px;
-}
-h1 { font-size: 24px; margin: 0 0 8px; }
-.panel {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  max-width: 650px;
-  margin: auto;
-}
-input, button {
-  font-size: 16px;
-  padding: 14px;
-  border-radius: 9px;
-}
-input {
-  width: 100%;
-  border: 1px solid #ccd5df;
-  margin-bottom: 12px;
-}
-button {
-  background: #142e4c;
-  color: white;
-  border: none;
-  margin: 4px 4px 4px 0;
-  cursor: pointer;
-}
-button.secondary { background: #63748a; }
-button.remove { background: #a72e35; }
-#reader {
-  width: 100%;
-  margin-top: 12px;
-}
-.item {
-  padding: 12px 0;
-  border-bottom: 1px solid #ddd;
-  overflow-wrap: anywhere;
-}
-#message { margin-top: 12px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+  <title>RVS Equipment Scanner</title>
+
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: Arial, sans-serif;
+      background: #f3f6fa;
+      color: #172b45;
+    }
+
+    header {
+      background: #142e4c;
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin: 0 0 8px;
+    }
+
+    .panel {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 650px;
+      margin: auto;
+    }
+
+    input, button {
+      font-size: 16px;
+      padding: 14px;
+      border-radius: 9px;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid #ccd5df;
+      margin-bottom: 12px;
+    }
+
+    button {
+      background: #142e4c;
+      color: white;
+      border: none;
+      margin: 4px 4px 4px 0;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #63748a;
+    }
+
+    button.remove {
+      background: #a72e35;
+    }
+
+    button:disabled {
+      background: #aab4c0;
+      cursor: not-allowed;
+    }
+
+    #reader {
+      width: 100%;
+      margin-top: 12px;
+    }
+
+    .item {
+      padding: 12px 0;
+      border-bottom: 1px solid #ddd;
+      overflow-wrap: anywhere;
+    }
+
+    .message {
+      margin-top: 12px;
+      white-space: pre-wrap;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .return-panel {
+      background: #edf4fa;
+      padding: 16px;
+      border-radius: 9px;
+      margin-top: 18px;
+    }
+
+    .return-panel button {
+      width: 100%;
+    }
+  </style>
 </head>
+
 <body>
 
 <header>
@@ -70,172 +116,320 @@ button.remove { background: #a72e35; }
 
 <div class="panel">
   <h2>Scan Equipment</h2>
-  <p>Scan one item at a time. All items stay in the same batch.</p>
 
-  
-<label for="jobSelect">Select Job:</label>
-<select id="jobSelect" required>
-  <option value="">-- Select Job --</option>
-</select>
+  <p>
+    Scan the manufacturer's barcode or serial number.
+    You can scan multiple items into one batch.
+  </p>
 
-<label for="technicianSelect">Select Technician:</label>
-<select id="technicianSelect" required>
-  <option value="">-- Select Technician --</option>
-</select>
+  <input
+    id="barcodeInput"
+    type="text"
+    placeholder="Scan or enter barcode"
+    autocomplete="off">
 
-<label for="actionSelect">Equipment Action:</label>
-<select id="actionSelect" required>
-  <option value="">-- Select Action --</option>
-  <option value="With Technician">Picking Up Equipment</option>
-  <option value="In Office">Returning Equipment</option>
-  <option value="Installed">Installing Equipment</option>
-</select>
+  <button onclick="addManual()">
+    + Add to Batch
+  </button>
 
-  <input id="barcodeInput"
-         placeholder="Scan or enter barcode">
+  <button id="startButton" onclick="startScanner()">
+    Scan with Camera
+  </button>
 
-  <button onclick="addManual()">+ Add to Batch</button>
-  <button onclick="startScanner()">Scan with Camera</button>
-  <button class="secondary" onclick="stopScanner()">Stop Camera</button>
+  <button class="secondary" onclick="stopScanner()">
+    Stop Camera
+  </button>
 
   <div id="reader"></div>
-  <p id="message">Ready to scan.</p>
+
+  <p id="message" class="message">
+    Ready to scan.
+  </p>
 
   <h3>Items in This Batch</h3>
-  <div id="items">No items scanned yet.</div>
 
-  <p><strong>Total: <span id="count">0</span></strong></p>
-  <button class="secondary" onclick="clearBatch()">Clear Batch</button>
+  <div id="items">
+    No items scanned yet.
+  </div>
+
+  <p>
+    <strong>
+      Total: <span id="count">0</span>
+    </strong>
+  </p>
+
+  <button class="secondary" onclick="clearBatch()">
+    Clear Batch
+  </button>
+
+  <div id="returnPanel" class="return-panel hidden">
+    <h3>Equipment Manager</h3>
+
+    <p>
+      Send a scanned barcode back to the
+      RVS Equipment Manager to find its
+      matching inventory record.
+    </p>
+
+    <button id="sendButton"
+            onclick="sendToEquipmentManager()">
+      Find in Equipment Manager
+    </button>
+
+    <p id="returnMessage" class="message"></p>
+  </div>
+
 </div>
 
 <script>
-let batch = [];
-let scanner = null;
-let scannerRunning = false;
-let scanBusy = false;
+  let batch = [];
+  let scanner = null;
+  let scannerRunning = false;
+  let scanBusy = false;
 
-function addBarcode(value) {
-  const code = String(value || '').trim();
-  if (!code) return;
+  const parameters =
+    new URLSearchParams(window.location.search);
 
-  if (batch.includes(code)) {
-    document.getElementById('message').textContent =
-      'Already scanned: ' + code;
-    return;
-  }
+  const returnUrl =
+    parameters.get('returnUrl') || '';
 
-  batch.push(code);
-  renderBatch();
-  document.getElementById('message').textContent =
-    'Added: ' + code;
-}
+  const jobId =
+    parameters.get('jobId') || '';
 
-function addManual() {
-  const input = document.getElementById('barcodeInput');
-  addBarcode(input.value);
-  input.value = '';
-  input.focus();
-}
+  function isAllowedReturnUrl(value) {
+    if (!value) return false;
 
-document.getElementById('barcodeInput')
-  .addEventListener('keydown', function(event) {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      addManual();
+    try {
+      const url = new URL(value);
+
+      return url.protocol === 'https:' &&
+        url.hostname === 'script.google.com' &&
+        url.pathname.includes('/macros/') &&
+        (
+          url.pathname.endsWith('/dev') ||
+          url.pathname.endsWith('/exec')
+        );
+    } catch (error) {
+      return false;
     }
-  });
-
-function renderBatch() {
-  const container = document.getElementById('items');
-  container.innerHTML = '';
-
-  if (batch.length === 0) {
-    container.textContent = 'No items scanned yet.';
   }
 
-  batch.forEach((code, index) => {
-    const row = document.createElement('div');
-    row.className = 'item';
+  function initializeReturnPanel() {
+    if (!isAllowedReturnUrl(returnUrl)) return;
 
-    const label = document.createElement('span');
-    label.textContent = (index + 1) + '. ' + code + ' ';
-
-    const remove = document.createElement('button');
-    remove.className = 'remove';
-    remove.textContent = 'Remove';
-    remove.onclick = function() {
-      batch.splice(index, 1);
-      renderBatch();
-    };
-
-    row.appendChild(label);
-    row.appendChild(remove);
-    container.appendChild(row);
-  });
-
-  document.getElementById('count').textContent = batch.length;
-}
-
-async function startScanner() {
-  const message = document.getElementById('message');
-
-  if (scannerRunning) return;
-
-  if (typeof Html5Qrcode === 'undefined') {
-    message.textContent = 'Scanner library could not load.';
-    return;
+    document.getElementById('returnPanel')
+      .classList.remove('hidden');
   }
 
-  try {
-    scanner = new Html5Qrcode('reader');
-    scannerRunning = true;
+  function addBarcode(value) {
+    const code = String(value || '').trim();
 
-    await scanner.start(
-      { facingMode: 'environment' },
-      { fps: 10, qrbox: { width: 250, height: 150 } },
-      async function(decodedText) {
-        if (scanBusy) return;
-        scanBusy = true;
-        addBarcode(decodedText);
-        await stopScanner();
-        scanBusy = false;
-      },
-      function() {}
+    if (!code) return;
+
+    if (batch.includes(code)) {
+      document.getElementById('message').textContent =
+        'Already scanned: ' + code;
+      return;
+    }
+
+    batch.push(code);
+    renderBatch();
+
+    document.getElementById('message').textContent =
+      'Added: ' + code;
+  }
+
+  function addManual() {
+    const input = document.getElementById('barcodeInput');
+
+    addBarcode(input.value);
+
+    input.value = '';
+    input.focus();
+  }
+
+  document.getElementById('barcodeInput')
+    .addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        addManual();
+      }
+    });
+
+  function renderBatch() {
+    const container = document.getElementById('items');
+
+    container.innerHTML = '';
+
+    if (batch.length === 0) {
+      container.textContent =
+        'No items scanned yet.';
+    }
+
+    batch.forEach(function(code, index) {
+      const row = document.createElement('div');
+      row.className = 'item';
+
+      const label = document.createElement('span');
+      label.textContent =
+        (index + 1) + '. ' + code + ' ';
+
+      const remove = document.createElement('button');
+      remove.className = 'remove';
+      remove.textContent = 'Remove';
+
+      remove.onclick = function() {
+        batch.splice(index, 1);
+        renderBatch();
+      };
+
+      row.appendChild(label);
+      row.appendChild(remove);
+      container.appendChild(row);
+    });
+
+    document.getElementById('count').textContent =
+      batch.length;
+
+    const sendButton =
+      document.getElementById('sendButton');
+
+    sendButton.disabled = batch.length === 0;
+  }
+
+  async function startScanner() {
+    const message =
+      document.getElementById('message');
+
+    if (scannerRunning) return;
+
+    if (typeof Html5Qrcode === 'undefined') {
+      message.textContent =
+        'Scanner library could not load.';
+      return;
+    }
+
+    try {
+      scanner = new Html5Qrcode('reader');
+      scannerRunning = true;
+      scanBusy = false;
+
+      await scanner.start(
+        { facingMode: 'environment' },
+        {
+          fps: 10,
+          qrbox: {
+            width: 250,
+            height: 150
+          }
+        },
+        async function(decodedText) {
+          if (scanBusy) return;
+
+          scanBusy = true;
+
+          addBarcode(decodedText);
+
+          await stopScanner();
+
+          scanBusy = false;
+        },
+        function() {}
+      );
+
+      message.textContent =
+        'Point camera at a barcode.';
+    } catch (error) {
+      scannerRunning = false;
+      scanner = null;
+
+      message.textContent =
+        'Unable to start camera: ' +
+        (error.message || String(error));
+    }
+  }
+
+  async function stopScanner() {
+    if (!scanner) return;
+
+    try {
+      if (scanner.isScanning) {
+        await scanner.stop();
+      }
+
+      scanner.clear();
+    } catch (error) {
+      console.error(error);
+    }
+
+    scanner = null;
+    scannerRunning = false;
+  }
+
+  function clearBatch() {
+    if (!confirm(
+      'Remove all items from this batch?'
+    )) {
+      return;
+    }
+
+    batch = [];
+    renderBatch();
+
+    document.getElementById('message').textContent =
+      'Batch cleared.';
+  }
+
+  async function sendToEquipmentManager() {
+    if (!isAllowedReturnUrl(returnUrl)) {
+      document.getElementById('returnMessage')
+        .textContent =
+          'Open the scanner from Equipment Manager first.';
+      return;
+    }
+
+    if (batch.length === 0) {
+      document.getElementById('returnMessage')
+        .textContent =
+          'Scan an item first.';
+      return;
+    }
+
+    if (batch.length > 1) {
+      document.getElementById('returnMessage')
+        .textContent =
+          'For now, send one barcode at a time. ' +
+          'Batch transfer will be added after ' +
+          'the first connection is tested.';
+      return;
+    }
+
+    await stopScanner();
+
+    const destination = new URL(returnUrl);
+
+    destination.searchParams.set(
+      'page',
+      'checkout'
     );
 
-    message.textContent = 'Point camera at a barcode.';
-  } catch (error) {
-    scannerRunning = false;
-    scanner = null;
-    message.textContent =
-      'Unable to start camera: ' +
-      (error.message || String(error));
-  }
-}
+    destination.searchParams.set(
+      'barcode',
+      batch[0]
+    );
 
-async function stopScanner() {
-  if (!scanner) return;
-
-  try {
-    if (scanner.isScanning) {
-      await scanner.stop();
+    if (jobId) {
+      destination.searchParams.set(
+        'jobId',
+        jobId
+      );
     }
-    scanner.clear();
-  } catch (error) {
-    console.error(error);
+
+    window.location.assign(destination.toString());
   }
 
-  scanner = null;
-  scannerRunning = false;
-}
-
-function clearBatch() {
-  if (!confirm('Remove all items from this batch?')) return;
-  batch = [];
+  initializeReturnPanel();
   renderBatch();
-  document.getElementById('message').textContent =
-    'Batch cleared.';
-}
 </script>
 
 </body>
