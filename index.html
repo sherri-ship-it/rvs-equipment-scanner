@@ -166,9 +166,9 @@
     <h3>Equipment Manager</h3>
 
     <p>
-      Send a scanned barcode back to the
-      RVS Equipment Manager to find its
-      matching inventory record.
+      Send all barcodes in this batch back to
+      RVS Equipment Manager to find their
+      matching inventory records.
     </p>
 
     <button id="sendButton"
@@ -391,16 +391,7 @@
     if (batch.length === 0) {
       document.getElementById('returnMessage')
         .textContent =
-          'Scan an item first.';
-      return;
-    }
-
-    if (batch.length > 1) {
-      document.getElementById('returnMessage')
-        .textContent =
-          'For now, send one barcode at a time. ' +
-          'Batch transfer will be added after ' +
-          'the first connection is tested.';
+          'Scan at least one item first.';
       return;
     }
 
@@ -413,9 +404,16 @@
       'checkout'
     );
 
+    // Preserve the existing single-barcode behavior.
     destination.searchParams.set(
       'barcode',
       batch[0]
+    );
+
+    // Include every barcode scanned in the batch.
+    destination.searchParams.set(
+      'barcodes',
+      JSON.stringify(batch)
     );
 
     if (jobId) {
