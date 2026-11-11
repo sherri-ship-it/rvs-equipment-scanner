@@ -323,17 +323,20 @@
             height: 150
           }
         },
-        async function(decodedText) {
+       
+        function(decodedText) {
           if (scanBusy) return;
 
           scanBusy = true;
 
           addBarcode(decodedText);
 
-          await stopScanner();
-
-          scanBusy = false;
+          // Keep camera open for multiple barcode scans.
+          setTimeout(function() {
+            scanBusy = false;
+          }, 1200);
         },
+
         function() {}
       );
 
